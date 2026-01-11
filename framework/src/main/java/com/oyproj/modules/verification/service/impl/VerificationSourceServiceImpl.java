@@ -8,7 +8,6 @@ import com.oyproj.modules.verification.entity.enums.VerificationSourceEnum;
 import com.oyproj.modules.verification.mapper.VerificationSourceMapper;
 import com.oyproj.modules.verification.service.VerificationSourceService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public class VerificationSourceServiceImpl implements VerificationSourceService 
         List<VerificationSource> resourceList = new ArrayList<>();
         List<VerificationSource> sliderList = new ArrayList<>();
         for(VerificationSource item:dbList){
-            if(item.getType().equals(VerificationSourceEnum.RESOURCE.name())){
+            if(item.getType().equals(VerificationSourceEnum.SOURCE.name())){
                 resourceList.add(item);
             }else if(item.getType().equals(VerificationSourceEnum.SLIDER.name())){
                 sliderList.add(item);

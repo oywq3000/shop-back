@@ -66,6 +66,10 @@ public enum CachePrefix {
      */
     VERIFICATION_IMAGE,
     /**
+     * 验证码key
+     */
+    VERIFICATION_KEY,
+    /**
      * 快递平台
      */
     EXPRESS,

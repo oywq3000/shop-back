@@ -5,6 +5,8 @@ import com.oyproj.modules.verification.entity.enums.VerificationSourceEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @author oywq3000
  * @since 2025-12-30
@@ -12,7 +14,7 @@ import lombok.Data;
 @Data
 @TableName("verification_source")
 @Schema(description = "验证码资源维护")
-public class VerificationSource {
+public class VerificationSource implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Schema(description = "资源名称")

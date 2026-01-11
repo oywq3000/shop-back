@@ -2,7 +2,6 @@ package com.oyproj.modules.verification.service;
 
 import com.oyproj.cache.CachePrefix;
 import com.oyproj.modules.verification.entity.dto.VerificationDTO;
-import com.sun.javafx.binding.StringFormatter;
 
 /**
  * @author oywq3000

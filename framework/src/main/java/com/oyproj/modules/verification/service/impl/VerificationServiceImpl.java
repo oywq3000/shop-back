@@ -6,6 +6,7 @@ import com.oyproj.common.enums.ResultCode;
 import com.oyproj.common.exception.ServiceException;
 import com.oyproj.common.utils.StringUtils;
 import com.oyproj.common.vo.SerializableStream;
+import com.oyproj.modules.verification.SliderImageUtil;
 import com.oyproj.modules.verification.entity.dos.VerificationSource;
 import com.oyproj.modules.verification.entity.dto.VerificationDTO;
 import com.oyproj.modules.verification.entity.enums.VerificationEnum;
@@ -75,11 +76,41 @@ public class VerificationServiceImpl implements VerificationService {
             SerializableStream sliderFile = getInputStream(sliderResource);
             SerializableStream interfereSliderFile = verificationCodeProperties.getInterfereNum() > 0 ? getInputStream(interfereResource) : null;
             //生成数据
-
+            Map<String,Object> resultMap = SliderImageUtil.pictureTemplatesCut(
+                    sliderFile,
+                    interfereSliderFile,
+                    originalFile,
+                    verificationCodeProperties.getWatermark(),
+                    verificationCodeProperties.getInterfereNum()
+            );
+            //生成验证参数 有效时间 默认600秒，可以自行配置
+            cache.put(cacheKey(verificationEnum,uuid),resultMap.get("randomX"), verificationCodeProperties.getEffectiveTime());
+            resultMap.put("key",cacheKey(verificationEnum,uuid));
+            resultMap.put("effectiveTime",verificationCodeProperties.getEffectiveTime());
+            //移除横坐标移动距离
+            resultMap.remove("randomX");
+            return resultMap;
+            
+        }catch (ServiceException e){
+            throw e;
+        }catch (Exception e){
+            log.error("生成验证码失败", e);
+            throw new ServiceException(ResultCode.ERROR);
         }
+    }
 
-
-
+    @Override
+    public boolean preCheck(Integer xPos, VerificationEnum verificationEnum, String uuid) {
+        String key = cacheKey(verificationEnum, uuid);
+        Integer trueXPos = (Integer) cache.get(key);
+        if(trueXPos==null){
+            throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
+        }
+        if(Math.abs(xPos-trueXPos)<verificationCodeProperties.getFaultTolerant()&&cache.remove(key)){
+            cache.put(key,true,verificationCodeProperties.getEffectiveTime());
+            return true;
+        }
+        throw new ServiceException(ResultCode.VERIFICATION_ERROR);
     }
 
     /**
@@ -88,18 +119,26 @@ public class VerificationServiceImpl implements VerificationService {
      * 这里是将不可序列化的inputstream序列化对象，存入redis缓存
      */
 
-    private SerializableStream getInputStream(String originalResource) throws Exception{
-        Object object = cache.get(CachePrefix.VERIFICATION_IMAGE.getPrefix()+originalResource);
+    private SerializableStream getInputStream(String imgResource) throws Exception{
+        Object object = cache.get(CachePrefix.VERIFICATION_IMAGE.getPrefix()+imgResource);
         if(object!=null){
             return (SerializableStream) object;
         }
-        if(StringUtils.isNotEmpty(originalResource)){
-            URL url = new URL(originalResource);
-            InputStream inputStream = url.openStream();
+        if(StringUtils.isNotEmpty(imgResource)){
+           /* //read online resource
+           URL url = new URL(originalResource);
+            InputStream inputStream = url.openStream();*/
+            //read local resource
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(imgResource);
             SerializableStream serializableStream = new SerializableStream(inputStream);
-            cache.put(CachePrefix.VERIFICATION_IMAGE.getPrefix()+originalResource,serializableStream);
+            cache.put(CachePrefix.VERIFICATION_IMAGE.getPrefix()+imgResource,serializableStream);
             return serializableStream;
         }
         return null;
     }
+    public static String cacheKey(VerificationEnum verificationEnum,String uuid){
+        return CachePrefix.VERIFICATION_KEY.getPrefix()+verificationEnum.name()+uuid;
+    }
+
+
 }

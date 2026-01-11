@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.InputStream;
+import java.io.Serializable;
 
 /**
  * 序列化的 input stream
@@ -14,7 +15,7 @@ import java.io.InputStream;
  */
 @Data
 @NoArgsConstructor
-public class SerializableStream {
+public class SerializableStream implements Serializable {
     private String base64;
 
     public SerializableStream(InputStream inputStream){

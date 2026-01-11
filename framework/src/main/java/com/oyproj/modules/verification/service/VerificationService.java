@@ -2,6 +2,7 @@ package com.oyproj.modules.verification.service;
 
 import com.oyproj.modules.verification.entity.enums.VerificationEnum;
 
+import java.net.InetAddress;
 import java.util.Map;
 
 /**
@@ -12,4 +13,5 @@ import java.util.Map;
  */
 public interface VerificationService {
     Map<String,Object> createVerification(VerificationEnum verificationEnum, String uuid);
+    boolean preCheck(Integer xPos,VerificationEnum verificationEnum, String uuid);
 }

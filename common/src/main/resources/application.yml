@@ -1,0 +1,103 @@
+server:
+  port: 8890
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    threads:
+      min-spare: 50
+      max: 1000
+
+spring:
+  application:
+    name: common
+  cache:
+    type: redis
+  #sql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.200.132:3306/shop?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowMultiQueries=true
+    username: root
+    password: 123456
+  #Redis
+  redis:
+    host: 192.168.200.132
+    port: 6379
+    password: portal
+    database: 0
+    timeout: 2000ms
+  # 文件大小限制
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  jackson:
+    time-zone: GMT+8
+    serialization:
+      fail-on-empty-beans: false
+
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*.xml
+  configuration:
+    #缓存开启
+    cache-enabled: true
+    #日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+logging:
+  config: classpath:logback-spring.xml
+  #输出级别
+  level:
+    root: info
+  file:
+    path: shop-logs
+  logback:
+    rollingpolicy:
+      max-history: 7
+      max-file-size: 5MB
+
+shop:
+  verification-code:
+    #图形验证码有效时间 秒 包含滑块验证码有效时间， 以及验证通过之后，缓存中存储的验证结果有效时间
+    effective-time: 300
+    #水印
+    watermark: SHOP
+    #干扰项数量 最大2 默认0
+    interfereNum: 0
+    #允许误差像素
+    faultTolerant: 3
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    enabled: true
+    doc-expansion: none  # 移除单引号
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'common-api'
+      paths-to-match: '/**'
+      # 修改为实际的控制器包路径
+      packages-to-scan: com.oyproj.controller
+#springdoc:
+#  swagger-ui:
+#    # 修改Swagger UI路径
+#    path: /swagger-ui.html
+#    # 开启Swagger UI界面
+#    enabled: true
+#    # 用于配置tag和operation的展开方式，这里配置为都不展开
+#    doc-expansion: 'none'
+#  api-docs:
+#    # 修改api-docs路径
+#    path: /v3/api-docs
+#    # 开启api-docs
+#    enabled: true
+#  group-configs:
+#    - group: 'default'
+#      packages-to-scan: com.oyproj.controller
+#  default-flat-param-object: false
+

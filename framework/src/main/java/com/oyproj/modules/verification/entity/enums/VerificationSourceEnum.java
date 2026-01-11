@@ -14,7 +14,7 @@ public enum VerificationSourceEnum {
     /**
      * 验证码源
      */
-    RESOURCE("验证码源");
+    SOURCE("验证码源");
 
     private final String description;
 
