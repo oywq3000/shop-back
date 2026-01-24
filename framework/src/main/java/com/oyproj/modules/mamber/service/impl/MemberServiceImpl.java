@@ -1,10 +1,21 @@
 package com.oyproj.modules.mamber.service.impl;
 
+
+import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.oyproj.cache.Cache;
+import com.oyproj.common.context.UserContext;
+import com.oyproj.common.enums.ResultCode;
+import com.oyproj.common.event.TransactionCommitSendMQEvent;
+import com.oyproj.common.exception.ServiceException;
+import com.oyproj.common.properties.RocketmqCustomProperties;
 import com.oyproj.common.security.enums.UserEnums;
 import com.oyproj.common.security.token.Token;
+import com.oyproj.common.utils.SnowFlake;
 import com.oyproj.common.vo.PageVO;
 import com.oyproj.modules.mamber.entity.dos.Member;
 import com.oyproj.modules.mamber.entity.dto.ConnectAuthUser;
@@ -15,7 +26,14 @@ import com.oyproj.modules.mamber.entity.vo.MemberSearchVO;
 import com.oyproj.modules.mamber.entity.vo.MemberVO;
 import com.oyproj.modules.mamber.entity.vo.QRCodeLoginSessionVO;
 import com.oyproj.modules.mamber.entity.vo.QRLoginResultVO;
+import com.oyproj.modules.mamber.mapper.MemberMapper;
 import com.oyproj.modules.mamber.service.MemberService;
+import com.oyproj.rocketmq.tags.MemberTagsEnum;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +45,16 @@ import java.util.function.Function;
  * @author oywq3000
  * @since 2026-01-24
  */
-public class MemberServiceImpl implements MemberService {
+@Service
+@RequiredArgsConstructor
+public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implements MemberService {
+
+
+    private final Cache cache;
+    private final ApplicationEventPublisher eventPublisher;
+
+    private final RocketmqCustomProperties rocketmqCustomProperties;
+
     /**
      * 获得当前登入用户信息
      */
@@ -137,8 +164,26 @@ public class MemberServiceImpl implements MemberService {
      * @return 处理结果
      */
     @Override
+    @Transactional
     public Token register(String userName, String password, String mobilePhone) {
-        return null;
+        //测试会员信息
+        checkMember(userName,mobilePhone);
+        //设置会员信息
+        Member member = new Member(userName, new BCryptPasswordEncoder().encode(password), mobilePhone);
+        //注册成功后用户自动登录
+
+    }
+
+    @Transactional
+    public void registerHandler(Member member){
+        member.setId(SnowFlake.getIdStr());
+        //保存会员
+        this.save(member);
+        UserContext.settingInviter(member.getId(),cache);
+        // 发送会员注册信息
+        eventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register",
+                rocketmqCustomProperties.getMemberTopic(),
+                MemberTagsEnum.MEMBER_REGISTER.name(),member));
     }
 
     /**
@@ -466,5 +511,24 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Class<Member> getEntityClass() {
         return null;
+    }
+
+
+
+
+    private Long findMember(String mobilePhone,String userName){
+        LambdaQueryWrapper<Member> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Member::getMobile,mobilePhone)
+                .or()
+                .eq(Member::getUsername,userName);
+        return this.baseMapper.selectCount(lambdaQueryWrapper);
+    }
+
+
+    private void checkMember(String userName,String mobilePhone){
+        //判断手机号是否存在
+        if(findMember(mobilePhone,userName)>0){
+            throw new ServiceException(ResultCode.USER_EXIST);
+        }
     }
 }

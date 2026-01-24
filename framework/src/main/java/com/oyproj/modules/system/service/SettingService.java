@@ -19,7 +19,7 @@ public interface SettingService extends IService<Setting> {
     /**
      * 通过key获取
      */
-    @Cacheable(key = "#key")
+   //@Cacheable(key = "#key") todo recovery
     Setting get(String key);
 
     /**

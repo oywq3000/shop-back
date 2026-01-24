@@ -39,9 +39,9 @@ public class SmsController {
     @Operation(description = "发送短息验证码，一分钟同一ip只能请求一次")
     public ResultMessage getSmsCode(@RequestHeader String uuid,
                                     @PathVariable String mobile,
-                                    @PathVariable VerificationEnum verificationEnum){
-        verificationService.check(uuid,verificationEnum);
-        smsUtil.sendSmsCode(mobile, verificationEnum, uuid);
+                                    @PathVariable VerificationEnum verificationEnums){
+        //verificationService.check(uuid,verificationEnums); todo recovery
+        smsUtil.sendSmsCode(mobile, verificationEnums, uuid);
         return ResultUtil.success(ResultCode.VERIFICATION_SEND_SUCCESS);
     }
 }

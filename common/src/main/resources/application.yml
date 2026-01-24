@@ -43,7 +43,7 @@ mybatis-plus:
     #缓存开启
     cache-enabled: true
     #日志
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
 
 logging:
