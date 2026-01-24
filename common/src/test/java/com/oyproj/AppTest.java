@@ -9,11 +9,19 @@ import org.junit.jupiter.api.Test;
  */
 public class AppTest {
 
+
+    @Test
+    void test(){
+        String str = "hello";
+        String str2 = "hello";
+        System.out.println(str==str2);
+    }
     /**
      * Rigorous Test :-)
      */
     @Test
     public void shouldAnswerWithTrue() {
-        assertTrue(true);
+
+
     }
 }

@@ -14,4 +14,6 @@ import java.util.Map;
 public interface VerificationService {
     Map<String,Object> createVerification(VerificationEnum verificationEnum, String uuid);
     boolean preCheck(Integer xPos,VerificationEnum verificationEnum, String uuid);
+
+    boolean check(String uuid, VerificationEnum verificationEnum);
 }

@@ -1,5 +1,7 @@
 package com.oyproj.cache;
 
+import com.oyproj.common.security.enums.UserEnums;
+
 import java.nio.channels.NonReadableChannelException;
 
 /**
@@ -33,6 +35,11 @@ public enum CachePrefix {
      * 刷新 token 信息
      */
     REFRESH_TOKEN,
+    /**
+     * 邀请人
+     */
+    INVITER,
+
     /**
      * 联合登录响应
      */
@@ -70,6 +77,10 @@ public enum CachePrefix {
      */
     VERIFICATION_KEY,
     /**
+     * 验证码验证结果
+     */
+    VERIFICATION_RESULT,
+    /**
      * 快递平台
      */
     EXPRESS,
@@ -104,7 +115,13 @@ public enum CachePrefix {
     /**
      * 商品库存
      */
-    GOODS_STOCK;
+
+    GOODS_STOCK,
+
+    /**
+     * 短息验证码
+     */
+    SMS_CODE;
 
     public static String removePrefix(String str){
         return str.substring(str.lastIndexOf("}_")+2);
@@ -117,6 +134,17 @@ public enum CachePrefix {
      */
     public String getPrefix(){
         return "{"+this.name()+"}_";
+    }
+
+    /**
+     * 获取缓存key值+用户端+自定义前缀
+     *
+     * @param user
+     * @param customPrefix
+     * @return
+     */
+    public String getPrefix(UserEnums user,String customPrefix){
+        return "{"+this.name()+"_"+user.name()+"}_"+customPrefix+"_";
     }
 
 }

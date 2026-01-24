@@ -113,6 +113,23 @@ public class VerificationServiceImpl implements VerificationService {
         throw new ServiceException(ResultCode.VERIFICATION_ERROR);
     }
 
+
+    /**
+     * 验证码校验
+     *
+     * @param uuid 用户标识
+     * @param verificationEnum 验证key
+     * @return
+     */
+    @Override
+    public boolean check(String uuid, VerificationEnum verificationEnum) {
+        //如有校验标记则返回校验结果
+        if(Boolean.TRUE.equals(cache.remove(cacheResult(verificationEnum,uuid)))){
+            return true;
+        }
+        throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
+    }
+
     /**
      * 根据网络地址，获取源文件
      *
@@ -136,8 +153,26 @@ public class VerificationServiceImpl implements VerificationService {
         }
         return null;
     }
+
+    /**
+     * 生成缓存key 记录缓存需要验证的内容
+     * @param verificationEnum
+     * @param uuid
+     * @return
+     */
     public static String cacheKey(VerificationEnum verificationEnum,String uuid){
         return CachePrefix.VERIFICATION_KEY.getPrefix()+verificationEnum.name()+uuid;
+    }
+
+
+    /**
+     * 生成缓存key 记录缓存验证的结构
+     * @param verificationEnum
+     * @param uuid
+     * @return
+     */
+    public static String cacheResult(VerificationEnum verificationEnum,String uuid){
+        return CachePrefix.VERIFICATION_RESULT.getPrefix()+verificationEnum.name()+uuid;
     }
 
 
