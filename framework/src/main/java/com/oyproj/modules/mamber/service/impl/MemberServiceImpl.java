@@ -1,14 +1,13 @@
 package com.oyproj.modules.mamber.service.impl;
 
 
-import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.oyproj.cache.Cache;
-import com.oyproj.common.context.UserContext;
+import com.oyproj.common.security.context.UserContext;
 import com.oyproj.common.enums.ResultCode;
 import com.oyproj.common.event.TransactionCommitSendMQEvent;
 import com.oyproj.common.exception.ServiceException;
@@ -28,6 +27,7 @@ import com.oyproj.modules.mamber.entity.vo.QRCodeLoginSessionVO;
 import com.oyproj.modules.mamber.entity.vo.QRLoginResultVO;
 import com.oyproj.modules.mamber.mapper.MemberMapper;
 import com.oyproj.modules.mamber.service.MemberService;
+import com.oyproj.modules.mamber.token.MemberTokenGenerate;
 import com.oyproj.rocketmq.tags.MemberTagsEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -48,13 +48,11 @@ import java.util.function.Function;
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implements MemberService {
-
-
     private final Cache cache;
     private final ApplicationEventPublisher eventPublisher;
 
     private final RocketmqCustomProperties rocketmqCustomProperties;
-
+    private final MemberTokenGenerate memberTokenGenerate;
     /**
      * 获得当前登入用户信息
      */
@@ -169,9 +167,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
         //测试会员信息
         checkMember(userName,mobilePhone);
         //设置会员信息
+        //设置会员信息
         Member member = new Member(userName, new BCryptPasswordEncoder().encode(password), mobilePhone);
-        //注册成功后用户自动登录
-
+        registerHandler(member);
+        return memberTokenGenerate.createToken(member, false);
     }
 
     @Transactional
@@ -500,11 +499,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
 
     @Override
     public <V> V getObj(Wrapper<Member> queryWrapper, Function<? super Object, V> mapper) {
-        return null;
-    }
-
-    @Override
-    public BaseMapper<Member> getBaseMapper() {
         return null;
     }
 

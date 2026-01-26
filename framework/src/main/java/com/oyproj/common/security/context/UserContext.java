@@ -1,4 +1,4 @@
-package com.oyproj.common.context;
+package com.oyproj.common.security.context;
 
 import com.oyproj.cache.Cache;
 import com.oyproj.cache.CachePrefix;

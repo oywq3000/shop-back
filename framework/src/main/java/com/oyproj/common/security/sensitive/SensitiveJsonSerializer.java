@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import com.oyproj.common.context.UserContext;
+import com.oyproj.common.security.context.UserContext;
 import com.oyproj.common.properties.SystemSettingProperties;
 import com.oyproj.common.security.AuthUser;
 import com.oyproj.common.security.enums.UserEnums;

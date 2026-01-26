@@ -1,5 +1,5 @@
 server:
-  port: 8890
+  port: 8888
   servlet:
     context-path: /
   tomcat:
@@ -10,7 +10,7 @@ server:
 
 spring:
   application:
-    name: common
+    name: buyer
   cache:
     type: redis
   #sql
@@ -34,6 +34,8 @@ spring:
     time-zone: GMT+8
     serialization:
       fail-on-empty-beans: false
+  flyway:
+    ignore-ignored-migrations:
 
 
 mybatis-plus:
@@ -78,7 +80,7 @@ springdoc:
   api-docs:
     path: /v3/api-docs
   group-configs:
-    - group: 'common-api'
+    - group: 'buyer-api'
       paths-to-match: '/**'
       # 修改为实际的控制器包路径
       packages-to-scan: com.oyproj.controller
@@ -88,22 +90,45 @@ rocketmq:
     group: shop-producer-group  # 自定义一个唯一的生产者组名称
     send-message-timeout: 30000
 
+# 忽略TOKEN 鉴权的url:
 
-#springdoc:
-#  swagger-ui:
-#    # 修改Swagger UI路径
-#    path: /swagger-ui.html
-#    # 开启Swagger UI界面
-#    enabled: true
-#    # 用于配置tag和operation的展开方式，这里配置为都不展开
-#    doc-expansion: 'none'
-#  api-docs:
-#    # 修改api-docs路径
-#    path: /v3/api-docs
-#    # 开启api-docs
-#    enabled: true
-#  group-configs:
-#    - group: 'default'
-#      packages-to-scan: com.oyproj.controller
-#  default-flat-param-object: false
-
+ignored:
+  urls:
+    - /editor-app/**
+    - /actuator**
+    - /actuator/**
+    - /MP_verify_qSyvBPhDsPdxvOhC.txt
+    - /weixin/**
+    - /source/**
+    - /buyer/payment/cashier/**
+    - /buyer/payment/cashierRefund/**
+    - /buyer/other/pageData/**
+    - /buyer/other/article/**
+    - /buyer/goods/**
+    - /buyer/store/**
+    - /buyer/passport/connect/**
+    - /buyer/members/**
+    - /buyer/passport/member/**
+    - /buyer/passport/member/refresh/**
+    - /buyer/promotion/pintuan/**
+    - /buyer/promotion/seckill/**
+    - /buyer/promotion/pointsGoods/**
+    - /buyer/promotion/coupon
+    - /buyer/member/evaluation/**/goodsEvaluation
+    - /buyer/member/evaluation/**/evaluationNumber
+    - /buyer/other/appVersion/**
+    - /buyer/broadcast/studio/**
+    - /druid/**
+    - /swagger-ui.html
+    - /doc.html
+    - /v3/api-docs/**
+    - /swagger-resources/**
+    - /swagger/**
+    - /webjars/**
+    - /v2/api-docs
+    - /configuration/ui
+    - /boot-admin
+    - /**/*.js
+    - /**/*.css
+    - /**/*.png
+    - /**/*.ico

@@ -1,0 +1,27 @@
+package com.oyproj.common.security;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.ResponseUtil;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+/**
+ * 自定义 拒绝访问响应
+ *
+ * @author oywq3000
+ * @since 2026-01-26
+ */
+@Component
+@Slf4j
+public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+    @Override
+    public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AccessDeniedException e) throws IOException, ServletException {
+
+    }
+}

@@ -25,7 +25,7 @@ import javax.validation.constraints.NotNull;
 @Slf4j
 @RestController
 @Tag(description = "买家端，会员接口",name = "MemberBuyerController")
-@RequestMapping("/buyer/passport/")
+@RequestMapping("/buyer/passport/member")
 @RequiredArgsConstructor
 public class MemberBuyerController {
     private final MemberService memberService;
@@ -49,7 +49,6 @@ public class MemberBuyerController {
         }else{
             throw new ServiceException(ResultCode.VERIFICATION_SMS_CHECKED_ERROR);
         }
-
     }
 
 

@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.google.gson.Gson;
 import com.oyproj.cache.Cache;
 import com.oyproj.cache.CachePrefix;
-import com.oyproj.common.context.UserContext;
+import com.oyproj.common.security.context.UserContext;
 import com.oyproj.common.enums.ResultCode;
 import com.oyproj.common.exception.ServiceException;
 import com.oyproj.common.utils.CommonUtil;
@@ -20,7 +20,6 @@ import com.oyproj.modules.verification.entity.enums.VerificationEnum;
 import com.xkzhangsan.time.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
