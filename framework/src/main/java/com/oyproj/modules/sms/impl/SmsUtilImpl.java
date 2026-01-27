@@ -104,7 +104,7 @@ public class SmsUtilImpl implements SmsUtil {
         }
         //如果是测试模式，默认验证码6个1
         if(smsSetting.getIsTestModel()){
-            code = "111111";
+            //code = "111111"; //todo code default
             log.info("测试模式-接收手机：{},验证码：{}",mobile,code);
         }else{
             log.info("接收手机：{},验证码：{}", mobile, code);

@@ -69,6 +69,28 @@ shop:
     interfereNum: 0
     #允许误差像素
     faultTolerant: 3
+  data:
+    rocketmq:
+      promotion-topic: shop_promotion_topic
+      promotion-group: shop_promotion_group
+      msg-ext-topic: shop_msg_topic
+      msg-ext-group: shop_msg_group
+      goods-topic: shop_goods_topic
+      goods-group: shop_goods_group
+      order-topic: shop_order_topic
+      order-group: shop_order_group
+      member-topic: shop_member_topic
+      member-group: shop_member_group
+      store-topic: shop_store_topic
+      store-group: shop_store_group
+      other-topic: shop_other_topic
+      other-group: shop_other_group
+      notice-topic: shop_notice_topic
+      notice-group: shop_notice_group
+      notice-send-topic: shop_send_notice_topic
+      notice-send-group: shop_send_notice_group
+      after-sale-topic: shop_after_sale_topic
+      after-sale-group: shop_after_sale_group
 
 springdoc:
   swagger-ui:

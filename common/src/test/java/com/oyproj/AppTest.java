@@ -2,6 +2,7 @@ package com.oyproj;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.oyproj.common.utils.SnowFlake;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -21,7 +22,7 @@ public class AppTest {
      */
     @Test
     public void shouldAnswerWithTrue() {
-
-
+        String id = SnowFlake.getIdStr();
+        System.out.println(id);
     }
 }
