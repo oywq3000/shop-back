@@ -22,12 +22,10 @@ public class AuthUser implements Serializable {
      * 用户名
      */
     private String username;
-
     /**
      * 昵称
      */
     private String nickName;
-
     /**
      * 头像
      */

@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.oyproj.common.security.enums.UserEnums;
 import com.oyproj.common.vo.PageVO;
+import com.oyproj.modules.connect.entity.dto.ConnectAuthUser;
 import com.oyproj.modules.mamber.entity.dos.Member;
-import com.oyproj.modules.mamber.entity.dto.ConnectAuthUser;
+
 import com.oyproj.modules.mamber.entity.dto.ManagerMemberEditDTO;
 import com.oyproj.modules.mamber.entity.dto.MemberAddDTO;
 import com.oyproj.modules.mamber.entity.dto.MemberEditDTO;

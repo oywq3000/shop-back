@@ -4,9 +4,11 @@ import com.oyproj.cache.Cache;
 import com.oyproj.common.properties.IgnoredUrlsProperties;
 import com.oyproj.common.security.CustomAccessDeniedHandler;
 import com.oyproj.common.utils.SpringContextUtil;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -31,18 +33,47 @@ public class BuyerSecurityConfig extends WebSecurityConfigurerAdapter {
      * spring security ->权限不足处理
      */
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CorsConfigurationSource corsConfigurationSource;
     private final Cache<String> cache;
+
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry = http
                 .authorizeRequests();
+        // 允许跨域（建议提前至此处）
+        http.cors().configurationSource(corsConfigurationSource).and()
+                // 关闭跨站请求防护
+                .csrf().disable();
         //配置的url不需要授权
         for(String url: ignoredUrlsProperties.getUrls()){
             registry.antMatchers(url).permitAll();
+
         }
-        registry.and()
+        registry.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // 任何请求需要身份认证（注意：此规则必须在所有permitAll之后）
+                .anyRequest().authenticated()
+                .and()
+                // 禁止网页iframe
+                .headers().frameOptions().disable()
+                .and()
+                .logout()
+                .permitAll()
+                .and()
+                // 前后端分离采用JWT 不需要session
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                // 自定义权限拒绝处理类
+                .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
+                .and()
+                .addFilter(new BuyerAuthenticationFilter(authenticationManager(), cache));
+                // 允许跨域
+
+        /*registry.antMatchers(HttpMethod.OPTIONS, "/**").permitAll().and()
                 //禁止网页iframe
+
                 .headers().frameOptions().disable()
                 .and()
                 .logout()
@@ -55,7 +86,7 @@ public class BuyerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated()
                 .and()
                 //允许跨域
-                .cors().configurationSource((CorsConfigurationSource) SpringContextUtil.getBean("corsConfigurationSource")).and()
+                .cors().configurationSource(corsConfigurationSource).and()
                 //关闭跨站请求防护
                 .csrf().disable()
                 //前后端分离采用JWT 不需要session
@@ -64,6 +95,6 @@ public class BuyerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
                 .and()
-                .addFilter(new BuyerAuthenticationFilter(authenticationManager(), cache));
+                .addFilter(new BuyerAuthenticationFilter(authenticationManager(), cache));*/
     }
 }

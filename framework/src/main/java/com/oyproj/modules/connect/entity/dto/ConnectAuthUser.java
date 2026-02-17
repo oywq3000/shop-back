@@ -4,19 +4,17 @@ import cn.hutool.json.JSONObject;
 import com.oyproj.common.enums.ClientTypeEnum;
 import com.oyproj.modules.connect.config.ConnectAuthEnum;
 import com.oyproj.modules.connect.entity.enums.AuthUserGender;
+import com.oyproj.modules.mamber.entity.enums.ConnectEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.bytebuddy.asm.Advice;
 
 import java.io.Serializable;
 
 /**
- * AuthUser
- *
  * @author oywq3000
- * @since 2026-01-23
+ * @since 2026-01-24
  */
 @Builder
 @Data
@@ -25,7 +23,7 @@ import java.io.Serializable;
 public class ConnectAuthUser implements Serializable {
     private static final long serialVersionUID = -747696192479927491L;
     /**
-     * 用户第三方系统唯一id
+     * 用户第三方系统的唯一id
      */
     private String uuid;
     /**
@@ -65,6 +63,12 @@ public class ConnectAuthUser implements Serializable {
      */
     private AuthUserGender gender;
     /**
+     * 用户来源
+     * 例如：QQ、微信、微博等
+     */
+    private ConnectEnum source;
+
+    /**
      * 类型-客户端类型
      * 例如：PC、WAP、小程序
      */
@@ -77,9 +81,15 @@ public class ConnectAuthUser implements Serializable {
      * 第三方平台返回的原始用户信息
      */
     private JSONObject rawUserInfo;
+
     /**
      * 联合登陆类型
      */
     private ConnectAuthEnum connectEnum;
+
+    /**
+     * 手机号
+     */
+    private String phone;
 
 }

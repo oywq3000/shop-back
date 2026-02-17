@@ -21,6 +21,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -37,12 +38,13 @@ import java.util.List;
  * @author oywq3000
  * @since 2026-01-26
  */
+
 @Slf4j
 public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
     /**
      * 缓存
      */
-    @Autowired
+
     private Cache cache;
     /**
      * 自定义构造器

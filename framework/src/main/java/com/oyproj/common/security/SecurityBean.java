@@ -32,7 +32,7 @@ public class SecurityBean {
         config.setAllowCredentials(true);
         config.setAllowedOriginPatterns(Collections.singletonList(CorsConfiguration.ALL));
         config.addAllowedHeader(CorsConfiguration.ALL);
-        config.addAllowedHeader(CorsConfiguration.ALL);
+        config.addAllowedMethod(CorsConfiguration.ALL);
         source.registerCorsConfiguration("/**",config);
         return source;
     }

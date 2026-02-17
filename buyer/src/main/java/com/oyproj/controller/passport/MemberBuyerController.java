@@ -11,6 +11,7 @@ import com.oyproj.modules.verification.service.VerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import javax.validation.constraints.NotNull;
 @Tag(description = "买家端，会员接口",name = "MemberBuyerController")
 @RequestMapping("/buyer/passport/member")
 @RequiredArgsConstructor
+//buyer/passport/member/userLogin
 public class MemberBuyerController {
     private final MemberService memberService;
     private final SmsUtil smsUtil;
@@ -34,7 +36,10 @@ public class MemberBuyerController {
 
     @Operation(summary = "注册新用户")
     @Parameters({
-            @Parameter(),
+            @Parameter(name = "username",description = "用户名",required = true,in = ParameterIn.QUERY),
+            @Parameter(name = "password",description = "密码",required = true,in =  ParameterIn.QUERY),
+            @Parameter(name = "mobilePhone",description = "手机号",required = true,in =  ParameterIn.QUERY),
+            @Parameter(name = "code",description = "验证码",required = true,in =  ParameterIn.QUERY),
     })
     @PostMapping("/register")
     public ResultMessage<Object> register(
@@ -49,6 +54,19 @@ public class MemberBuyerController {
         }else{
             throw new ServiceException(ResultCode.VERIFICATION_SMS_CHECKED_ERROR);
         }
+    }
+
+    @Operation(description = "用户登入")
+    @Parameters({
+            @Parameter(name = "username",description = "用户名",required = true,in = ParameterIn.QUERY),
+            @Parameter(name = "password",description = "密码",required = true,in=ParameterIn.QUERY)
+    })
+    @PostMapping("/userLogin")
+    public ResultMessage<Object> userLogin(@NotNull(message = "用户名不能为空") String username,
+                                           @NotNull(message = "密码不能为空") String password,
+                                           @RequestHeader String uuid){
+        verificationService.check(uuid,VerificationEnum.LOGIN);
+        return ResultUtil.data(this.memberService.usernameLogin(username,password));
     }
 
 

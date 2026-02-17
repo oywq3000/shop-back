@@ -1,12 +1,13 @@
 package com.oyproj.modules.mamber.service.impl;
 
 
+import cn.hutool.core.text.CharSequenceUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.oyproj.cache.Cache;
+import com.oyproj.common.context.ThreadContextHolder;
 import com.oyproj.common.security.context.UserContext;
 import com.oyproj.common.enums.ResultCode;
 import com.oyproj.common.event.TransactionCommitSendMQEvent;
@@ -14,13 +15,13 @@ import com.oyproj.common.exception.ServiceException;
 import com.oyproj.common.properties.RocketmqCustomProperties;
 import com.oyproj.common.security.enums.UserEnums;
 import com.oyproj.common.security.token.Token;
+import com.oyproj.common.utils.CookieUtil;
 import com.oyproj.common.utils.SnowFlake;
 import com.oyproj.common.vo.PageVO;
+import com.oyproj.modules.connect.entity.Connect;
+import com.oyproj.modules.connect.entity.dto.ConnectAuthUser;
 import com.oyproj.modules.mamber.entity.dos.Member;
-import com.oyproj.modules.mamber.entity.dto.ConnectAuthUser;
-import com.oyproj.modules.mamber.entity.dto.ManagerMemberEditDTO;
-import com.oyproj.modules.mamber.entity.dto.MemberAddDTO;
-import com.oyproj.modules.mamber.entity.dto.MemberEditDTO;
+import com.oyproj.modules.mamber.entity.dto.*;
 import com.oyproj.modules.mamber.entity.vo.MemberSearchVO;
 import com.oyproj.modules.mamber.entity.vo.MemberVO;
 import com.oyproj.modules.mamber.entity.vo.QRCodeLoginSessionVO;
@@ -28,6 +29,7 @@ import com.oyproj.modules.mamber.entity.vo.QRLoginResultVO;
 import com.oyproj.modules.mamber.mapper.MemberMapper;
 import com.oyproj.modules.mamber.service.MemberService;
 import com.oyproj.modules.mamber.token.MemberTokenGenerate;
+import com.oyproj.modules.connect.service.ConnectService;
 import com.oyproj.rocketmq.tags.MemberTagsEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,6 +55,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
 
     private final RocketmqCustomProperties rocketmqCustomProperties;
     private final MemberTokenGenerate memberTokenGenerate;
+    private final ConnectService connectService;
     /**
      * 获得当前登入用户信息
      */
@@ -83,7 +86,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
      */
     @Override
     public Member findByUsername(String username) {
-        return null;
+        return findMember(username);
     }
 
     /**
@@ -94,8 +97,61 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
      */
     @Override
     public Token usernameLogin(String username, String password) {
+        Member member = this.findMember(username);
+        //用户是否存在
+        if(member==null||!member.getDisabled()){
+            throw new ServiceException(ResultCode.USER_NOT_BINDING);
+        }
+        //密码是否正确
+        if(!new BCryptPasswordEncoder().matches(password,member.getPassword())){
+            throw  new ServiceException(ResultCode.USER_PASSWORD_ERROR);
+        }
+        loginBindUser(member);
+        return memberTokenGenerate.createToken(member,false);
+    }
+    /**
+     * 成功登入，则检测cookie中的信息，进行会员绑定
+     */
+    private void loginBindUser(Member member){
+        //获取cookie存储的信息
+        String uuid = CookieUtil.getCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpRequest());
+        String connectType = CookieUtil.getCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpRequest());
+        if(CharSequenceUtil.isNotEmpty(uuid)&&CharSequenceUtil.isNotEmpty(connectType)){
+            try{
+                //获取信息
+                ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid,connectType);
+                if(connectAuthUser==null){
+                    return;
+                }
+                Connect connect = connectService.queryConnect(
+                        ConnectQueryDTO.builder().unionId(connectAuthUser.getUuid()).unionType(connectType).build()
+                );
+                if(connect==null){
+                    connect = new Connect(member.getId(),connectAuthUser.getUuid(),connectType);
+                    connectService.save(connect);
+                }
+            }catch (ServiceException e){
+                throw e;
+            }catch (Exception e) {
+                log.error("绑定第三方联合登陆失败：", e);
+            }finally {
+                //联合登陆成功与否，都清除掉cookie中的信息
+                CookieUtil.delCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpResponse());
+                CookieUtil.delCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpResponse());
+            }
+        }
+    }
+    /**
+     * 获取cookie中的联合登录对象
+     */
+    private ConnectAuthUser getConnectAuthUser(String uuid,String type){
+        Object context = cache.get(ConnectService.cacheKey(type,uuid));
+        if(context!=null){
+            return (ConnectAuthUser) context;
+        }
         return null;
     }
+    
 
     /**
      * 商家登录：用户名、密码登录
@@ -462,53 +518,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
         return null;
     }
 
-    @Override
-    public boolean saveBatch(Collection<Member> entityList, int batchSize) {
-        return false;
-    }
-
-    @Override
-    public boolean saveOrUpdateBatch(Collection<Member> entityList, int batchSize) {
-        return false;
-    }
-
-    @Override
-    public boolean updateBatchById(Collection<Member> entityList, int batchSize) {
-        return false;
-    }
-
-    @Override
-    public boolean saveOrUpdate(Member entity) {
-        return false;
-    }
-
-    @Override
-    public Member getOne(Wrapper<Member> queryWrapper, boolean throwEx) {
-        return null;
-    }
-
-    @Override
-    public Optional<Member> getOneOpt(Wrapper<Member> queryWrapper, boolean throwEx) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Map<String, Object> getMap(Wrapper<Member> queryWrapper) {
-        return null;
-    }
-
-    @Override
-    public <V> V getObj(Wrapper<Member> queryWrapper, Function<? super Object, V> mapper) {
-        return null;
-    }
-
-    @Override
-    public Class<Member> getEntityClass() {
-        return null;
-    }
-
-
-
 
     private Long findMember(String mobilePhone,String userName){
         LambdaQueryWrapper<Member> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -517,6 +526,18 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
                 .eq(Member::getUsername,userName);
         return this.baseMapper.selectCount(lambdaQueryWrapper);
     }
+
+    /**
+     * 根据用户名查序用户
+     * @param username
+     * @return
+     */
+    private Member findMember(String username){
+        LambdaQueryWrapper<Member> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Member::getUsername,username);
+        return this.getOne(lambdaQueryWrapper,false);
+    }
+
 
 
     private void checkMember(String userName,String mobilePhone){

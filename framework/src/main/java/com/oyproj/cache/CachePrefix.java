@@ -121,7 +121,12 @@ public enum CachePrefix {
     /**
      * 短息验证码
      */
-    SMS_CODE;
+    SMS_CODE,
+
+    /**
+     * 第三方用户权限
+     */
+    CONNECT_AUTH;
 
     public static String removePrefix(String str){
         return str.substring(str.lastIndexOf("}_")+2);

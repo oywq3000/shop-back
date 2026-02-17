@@ -107,7 +107,7 @@ public class VerificationServiceImpl implements VerificationService {
             throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
         }
         if(Math.abs(xPos-trueXPos)<verificationCodeProperties.getFaultTolerant()&&cache.remove(key)){
-            cache.put(key,true,verificationCodeProperties.getEffectiveTime());
+            cache.put(cacheResult(verificationEnum,uuid),true,verificationCodeProperties.getEffectiveTime());
             return true;
         }
         throw new ServiceException(ResultCode.VERIFICATION_ERROR);
@@ -125,6 +125,7 @@ public class VerificationServiceImpl implements VerificationService {
     public boolean check(String uuid, VerificationEnum verificationEnum) {
         //如有校验标记则返回校验结果
         if(Boolean.TRUE.equals(cache.remove(cacheResult(verificationEnum,uuid)))){
+            //删除并返回true
             return true;
         }
         throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);

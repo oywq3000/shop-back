@@ -3,11 +3,21 @@ import com.oyproj.common.event.TransactionCommitSendMQEvent;
 import com.oyproj.common.properties.RocketmqCustomProperties;
 import com.oyproj.common.utils.SnowFlake;
 import com.oyproj.modules.mamber.entity.dos.Member;
+import com.oyproj.modules.mamber.service.MemberService;
 import com.oyproj.rocketmq.tags.MemberTagsEnum;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
+
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.Arrays;
+
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Unit test for simple App.
@@ -17,17 +27,11 @@ import org.springframework.context.ApplicationEventPublisher;
 public class AppTest {
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
-    @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
-    /**
-     * Rigorous Test :-)
-     */
+    private MemberService memberService;
+
     @Test
     public void shouldAnswerWithTrue() {
-        Member member = new Member();
-        eventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register",
-                rocketmqCustomProperties.getMemberTopic(),
-                MemberTagsEnum.MEMBER_REGISTER.name(),member));
+        Member admin = memberService.findByUsername("admin");
+        System.out.println(admin);
     }
 }
