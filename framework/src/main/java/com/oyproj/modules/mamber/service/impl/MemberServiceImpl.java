@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.oyproj.cache.Cache;
 import com.oyproj.common.context.ThreadContextHolder;
+import com.oyproj.common.security.AuthUser;
 import com.oyproj.common.security.context.UserContext;
 import com.oyproj.common.enums.ResultCode;
 import com.oyproj.common.event.TransactionCommitSendMQEvent;
@@ -61,7 +62,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
      */
     @Override
     public Member getUserInfo() {
-        return null;
+        AuthUser tokenUser = UserContext.getCurrentUser();
+        if(tokenUser!=null){
+            Member member = this.findByUsername(tokenUser.getUsername());
+            if(member!=null&&!member.getDisabled()){
+                throw new ServiceException(ResultCode.USER_STATUS_ERROR);
+            }
+            return member;
+        }
+        throw new ServiceException(ResultCode.USER_NOT_LOGIN);
     }
 
     /**
@@ -86,7 +95,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
      */
     @Override
     public Member findByUsername(String username) {
-        return findMember(username);
+        LambdaQueryWrapper<Member> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Member::getUsername,username);
+        return getOne(lambdaQueryWrapper,false);
     }
 
     /**

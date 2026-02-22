@@ -4,6 +4,7 @@ import com.oyproj.common.enums.ResultCode;
 import com.oyproj.common.enums.ResultUtil;
 import com.oyproj.common.exception.ServiceException;
 import com.oyproj.common.vo.ResultMessage;
+import com.oyproj.modules.mamber.entity.dos.Member;
 import com.oyproj.modules.mamber.service.MemberService;
 import com.oyproj.modules.sms.SmsUtil;
 import com.oyproj.modules.verification.entity.enums.VerificationEnum;
@@ -67,6 +68,12 @@ public class MemberBuyerController {
                                            @RequestHeader String uuid){
         verificationService.check(uuid,VerificationEnum.LOGIN);
         return ResultUtil.data(this.memberService.usernameLogin(username,password));
+    }
+
+    @Operation(description = "获取当前登录用户接口")
+    @GetMapping
+    public ResultMessage<Member> getUserInfo(){
+        return ResultUtil.data(memberService.getUserInfo());
     }
 
 
