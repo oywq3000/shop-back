@@ -28,6 +28,7 @@ public class TokenUtil {
     private final JWTTokenProperties tokenProperties;
     private final Cache cache;
 
+
     /**
      * 构建token
      */
@@ -60,11 +61,19 @@ public class TokenUtil {
             //token 过期 认证失败等
             throw new ServiceException(ResultCode.USER_AUTH_EXPIRED);
         }
+
         //获取存储在claims中的用户信息
         String json = claims.get(SecurityEnum.USER_CONTEXT.getValue()).toString();
         AuthUser authUser = new Gson().fromJson(json, AuthUser.class);
         UserEnums userEnums = authUser.getRole();
-        String username = authUser.getUsername();
+        //refresh token 频繁检测
+        String refreshTimeKey =  CachePrefix.REFRESH_TOKEN_TIME.getPrefix(userEnums,authUser.getId());
+        Long lastRefreshTime = (Long)cache.get(refreshTimeKey);
+        long currentTime = System.currentTimeMillis();
+        if(lastRefreshTime!=null
+        &&tokenProperties.getMinRefreshInterval()>currentTime-lastRefreshTime){
+            throw new ServiceException(ResultCode.TOKEN_REFRESH_TOO_FREQUENT);
+        }
         //获取是否长期有效的token
         boolean longTerm = authUser.getLongTerm();
         //如果缓存中有刷新token
@@ -75,6 +84,7 @@ public class TokenUtil {
             cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums, authUser.getId())+ accessToken,1
                     ,tokenProperties.getTokenExpireTime()
                     ,TimeUnit.MINUTES);
+
             //如果是信任登录设备，则刷新token长度继续延长
             Long expirationTime = tokenProperties.getTokenExpireTime()*2;
             if(longTerm){
@@ -85,9 +95,12 @@ public class TokenUtil {
             String refreshToken = createToken(authUser, expirationTime);
 
             cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) + refreshToken, 1, expirationTime, TimeUnit.MINUTES);
+            cache.remove(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) + oldRefreshToken);
+            cache.put(refreshTimeKey, currentTime, expirationTime, TimeUnit.MINUTES);
             token.setAccessToken(accessToken);
             token.setRefreshToken(refreshToken);
-            cache.remove(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) + oldRefreshToken);
+
+
             return token;
         }else {
             throw new ServiceException(ResultCode.USER_AUTH_EXPIRED);

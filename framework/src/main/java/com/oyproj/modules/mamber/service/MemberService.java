@@ -302,4 +302,6 @@ public interface MemberService extends IService<Member> {
     boolean appSConfirm(String token, Integer code);
 
     QRLoginResultVO loginWithSession(String token);
+
+    Member findByThirdPartyId(String githubId);
 }

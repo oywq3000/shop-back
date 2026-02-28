@@ -4,6 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import com.google.gson.Gson;
 import com.oyproj.cache.Cache;
 import com.oyproj.cache.CachePrefix;
+import com.oyproj.common.enums.ResultCode;
+import com.oyproj.common.exception.ServiceException;
 import com.oyproj.common.security.AuthUser;
 import com.oyproj.common.security.enums.SecurityEnum;
 import com.oyproj.common.security.enums.UserEnums;
@@ -22,6 +24,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -40,7 +43,7 @@ import java.util.List;
  */
 
 @Slf4j
-public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
+public class BuyerAuthenticationFilter extends OncePerRequestFilter {
     /**
      * 缓存
      */
@@ -49,11 +52,9 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
     /**
      * 自定义构造器
      *
-     * @param authenticationManager
+     *
      */
-    public BuyerAuthenticationFilter(AuthenticationManager authenticationManager,
-                                     Cache cache) {
-        super(authenticationManager);
+    public BuyerAuthenticationFilter(Cache cache) {
         this.cache = cache;
     }
 
@@ -73,6 +74,7 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }catch (Exception e){
             log.error("BuyerAuthenticationFilter-> member authentication exception:", e);
+            throw new ServiceException(ResultCode.USER_AUTH_EXPIRED);
         }
         chain.doFilter(request, response);
     }
@@ -90,6 +92,7 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
             String json = claims.get(SecurityEnum.USER_CONTEXT.getValue()).toString();
             AuthUser authUser = new Gson().fromJson(json, AuthUser.class);
             //校验redis中是否有权限
+            //校验redis中是否存有该{用户类型,用户ID}_jwtToken
             if(cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER,authUser.getId())+ jwt)){
                 //构造返回信息
                 List<GrantedAuthority> auths = new ArrayList<>();

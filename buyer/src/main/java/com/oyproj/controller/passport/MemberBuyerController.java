@@ -3,6 +3,7 @@ package com.oyproj.controller.passport;
 import com.oyproj.common.enums.ResultCode;
 import com.oyproj.common.enums.ResultUtil;
 import com.oyproj.common.exception.ServiceException;
+import com.oyproj.common.security.token.Token;
 import com.oyproj.common.vo.ResultMessage;
 import com.oyproj.modules.mamber.entity.dos.Member;
 import com.oyproj.modules.mamber.service.MemberService;
@@ -76,5 +77,12 @@ public class MemberBuyerController {
         return ResultUtil.data(memberService.getUserInfo());
     }
 
+    @Operation(description = "刷新Token")
+    @GetMapping("/refresh/{refreshToken}")
+    public ResultMessage<Object> refreshToken(@NotNull(message = "刷新token不能为空") @PathVariable String refreshToken){
+        ResultMessage<Object> data = ResultUtil.data(this.memberService.refreshToken(refreshToken));
+        log.info("token refresh");
+        return data;
+    }
 
 }

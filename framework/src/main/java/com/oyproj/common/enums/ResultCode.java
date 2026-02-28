@@ -20,7 +20,10 @@ public enum ResultCode {
      * 参数异常
      */
     PARAMS_ERROR(4002, "参数异常"),
-
+    /**
+     * Token 刷新过于频繁
+     */
+    TOKEN_REFRESH_TOO_FREQUENT(4007,"刷新过于频繁"),
 
     /**
      * 系统异常

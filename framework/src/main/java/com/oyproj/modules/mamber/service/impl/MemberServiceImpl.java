@@ -371,7 +371,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
      */
     @Override
     public Token refreshToken(String refreshToken) {
-        return null;
+        return memberTokenGenerate.refreshToken(refreshToken);
     }
 
     /**
@@ -527,6 +527,17 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper,Member> implemen
     @Override
     public QRLoginResultVO loginWithSession(String token) {
         return null;
+    }
+
+    @Override
+    public Member findByThirdPartyId(String thirdPartId) {
+        return findByMemberId(thirdPartId);
+    }
+
+    private Member findByMemberId(String memberId){
+        LambdaQueryWrapper<Member> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Member::getId,memberId);
+        return this.getOne(lambdaQueryWrapper,false);
     }
 
 

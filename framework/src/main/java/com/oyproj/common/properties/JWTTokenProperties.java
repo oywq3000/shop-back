@@ -18,4 +18,9 @@ public class JWTTokenProperties {
      * token默认过期时间
      */
     private long tokenExpireTime = 60;
+    /**
+     * 最小token刷新间隔
+     */
+    private  long minRefreshInterval = 600000L;
+
 }

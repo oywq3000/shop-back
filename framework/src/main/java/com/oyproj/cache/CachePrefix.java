@@ -36,6 +36,10 @@ public enum CachePrefix {
      */
     REFRESH_TOKEN,
     /**
+     * 刷新token的时间
+     */
+    REFRESH_TOKEN_TIME,
+    /**
      * 邀请人
      */
     INVITER,

@@ -36,6 +36,20 @@ spring:
       fail-on-empty-beans: false
   flyway:
     ignore-ignored-migrations:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: Ov23lihadb5gFGTSUnp0
+            client-secret: 32abc684db817c0a0988fd06ccc24953c4c4214c
+            redirect-uri: http://localhost:8888/buyer/passport/connect/github/callback
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login
 
 
 mybatis-plus:
@@ -129,6 +143,8 @@ ignored:
     - /buyer/goods/**
     - /buyer/store/**
     - /buyer/passport/connect/**
+    - /buyer/oauth2/authorization/**
+    - /oauth2/authorization/**
     - /buyer/members/**
     - /buyer/passport/member/**
     - /buyer/passport/member/refresh/**
